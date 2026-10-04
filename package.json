@@ -1,0 +1,29 @@
+{
+  "name": "strands-decider-lambda",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Strands Decider 2B on AWS Lambda behind a Function URL, speaking the Jev System One API",
+  "packageManager": "pnpm@10.28.1",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:py": "python -m pytest lambda/tests -q",
+    "synth": "cdk synth",
+    "diff": "cdk diff",
+    "deploy": "cdk deploy"
+  },
+  "dependencies": {
+    "aws-cdk-lib": "2.272.0",
+    "constructs": "10.8.1"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.4",
+    "aws-cdk": "2.1144.0",
+    "tsx": "4.23.15",
+    "typescript": "7.0.2",
+    "vitest": "5.0.3"
+  }
+}
