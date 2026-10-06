@@ -30,6 +30,21 @@ JSON_HEADERS = {"content-type": "application/json"}
 _engine: Any = None
 
 
+def _cpu_part() -> str:
+    """0xd0c is Graviton2 (Neoverse N1), 0xd40 is Graviton3 (Neoverse V1); Lambda arm64 mixes both."""
+    try:
+        with open("/proc/cpuinfo") as f:
+            for line in f:
+                if line.startswith("CPU part"):
+                    return line.split(":", 1)[1].strip()
+    except OSError:
+        pass
+    return "unknown"
+
+
+CPU_PART = _cpu_part()
+
+
 def _load_engine() -> Any:
     import torch
     from strands_decider.infer import EngineConfig, SystemOneEngine
@@ -44,8 +59,18 @@ def _load_engine() -> Any:
     with torch.inference_mode():
         model = StrandsDeciderModel.load(MODEL_DIR)
         engine = SystemOneEngine(model, EngineConfig(device="cpu", model_name=MODEL_NAME))
+        if os.environ.get("DECIDER_MERGE_LORA", "1") == "1":
+            # After the fp32 upcast, so the adapter folds into fp32 weights and answers are unchanged.
+            engine.model.torso = engine.model.torso.merge_and_unload()
     logger.info(
-        json.dumps({"event": "model_loaded", "seconds": round(time.perf_counter() - started, 2), "threads": threads})
+        json.dumps(
+            {
+                "event": "model_loaded",
+                "seconds": round(time.perf_counter() - started, 2),
+                "threads": threads,
+                "cpu_part": CPU_PART,
+            }
+        )
     )
     return engine
 
@@ -110,7 +135,11 @@ def handle_systemone(event: dict[str, Any]) -> dict[str, Any]:
         return _error(422, str(exc))
     elapsed_ms = round((time.perf_counter() - started) * 1000, 2)
 
-    return _response(200, result.model_dump(), {"x-decider-latency-ms": str(elapsed_ms)})
+    return _response(
+        200,
+        result.model_dump(),
+        {"x-decider-latency-ms": str(elapsed_ms), "x-decider-cpu-part": CPU_PART},
+    )
 
 
 def handle_health() -> dict[str, Any]:

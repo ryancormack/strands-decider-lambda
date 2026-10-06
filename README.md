@@ -75,14 +75,14 @@ Response (real output):
 
 Measured on the deployed function in eu-west-1. "Server" is the time the handler reported, not round trip.
 
-| Request | Server time |
-|---|---|
-| 1 question, 86 input tokens | 1.7 s |
-| 2 questions, 133 tokens | 3.4 s |
-| 3 questions, 196 tokens | 4.2 s |
-| 3 questions, 358 tokens | 5.8 s |
+| Request | Graviton3 sandbox | Graviton2 sandbox |
+|---|---|---|
+| 1 question, 86 input tokens | 1.3 s | 2.2 to 2.5 s |
+| 3 questions, 196 input tokens | 3.3 s | 6.0 to 6.1 s |
 
-Median of three warm runs on the faster sandboxes. In a burst of four concurrent sandboxes, three ran the 1-question request in 1.65 s and one in 2.5 s, and another ran about 1.5x slower across the board. I haven't established why sandboxes differ, so expect that spread.
+Median warm server time over two bursts of five concurrent sandboxes. Lambda arm64 places a sandbox on either CPU generation: `/proc/cpuinfo` showed Neoverse N1 (Graviton2, no bf16 or i8mm) and Neoverse V1 (Graviton3) in a 12-sandbox probe, and you can't choose. Each response carries `x-decider-cpu-part` (`0xd0c` is Graviton2, `0xd40` is Graviton3) so a latency can be attributed. Expect roughly 1.8x between the two.
+
+The LoRA adapter is merged into the fp32 weights at load (`DECIDER_MERGE_LORA=0` turns that off). Answers are identical to four decimals, and on the same image it was about 9% faster for 3 questions and 6% for 1 on Graviton3, and within 3% on Graviton2 (one to four sandboxes per figure, so treat it as indicative).
 
 Time scales with questions and input length, since each is a forward pass of a 2B model on 6 vCPUs. The model has no GPU path here, so this is the floor for this configuration, and more memory doesn't help because 10,240 MB is Lambda's maximum.
 
