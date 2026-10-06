@@ -22,7 +22,7 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 MODEL_DIR = os.environ.get("DECIDER_MODEL_DIR", "/model/checkpoint")
-MODEL_NAME = os.environ.get("DECIDER_MODEL_NAME", "strands-decider-2B-hobson-v19")
+MODEL_NAME = os.environ.get("DECIDER_MODEL_NAME", "strands-decider-2B-hobson-v21")
 SYSTEMONE_PATH = "/v1/systemone"
 HEALTH_PATH = "/health"
 JSON_HEADERS = {"content-type": "application/json"}

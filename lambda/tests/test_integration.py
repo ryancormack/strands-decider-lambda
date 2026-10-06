@@ -73,7 +73,7 @@ def test_health(loaded: float) -> None:
     body = json.loads(response["body"])
     assert response["statusCode"] == 200
     assert body["status"] == "ok" and body["device"] == "cpu"
-    assert body["model"] == "strands-decider-2B-hobson-v19"
+    assert body["model"] == "strands-decider-2B-hobson-v21"
 
 
 def test_documented_example_matches_published_answers(loaded: float) -> None:
@@ -82,7 +82,7 @@ def test_documented_example_matches_published_answers(loaded: float) -> None:
     assert set(body) == {"model", "answers", "usage"}
     answers = body["answers"]
 
-    # Published v19 output for this input: noul 0.829, billing 0.769 confidence, score 1.10.
+    # Published v21 output for this input: noul 0.875, billing confidence 0.837, score 1.07.
     assert 0.7 < answers["is_urgent"]["noul"] < 0.95
     assert answers["team"]["choice"] == "billing"
     assert set(answers["team"]["probabilities"]) == {"billing", "sales", "retail"}

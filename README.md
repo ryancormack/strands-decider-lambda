@@ -1,6 +1,6 @@
 # strands-decider-lambda
 
-[Strands Decider](https://github.com/strands-labs/strands-decider) (`strands-decider-2B-hobson-v19`) behind an IAM-authenticated Lambda Function URL, speaking the Jev System One API.
+[Strands Decider](https://github.com/strands-labs/strands-decider) (`strands-decider-2B-hobson-v21`) behind an IAM-authenticated Lambda Function URL, speaking the Jev System One API.
 
 This is written so the model can run as a remote service on CPU only, with no GPU and nothing to keep running. It is slow. A warm request takes 2 to 6 seconds, and a cold start takes about 30 seconds. It is also cheap: around $0.0002 to $0.0007 per request, and $0 while idle. The trade is latency for cost, which makes sense when a small model can take over classification and routing work that would otherwise go to a larger, more expensive model.
 
@@ -55,14 +55,14 @@ Response (real output):
 
 ```json
 {
-  "model": "strands-decider-2B-hobson-v19",
+  "model": "strands-decider-2B-hobson-v21",
   "answers": {
-    "is_urgent": {"type": "noul", "noul": 0.8091},
+    "is_urgent": {"type": "noul", "noul": 0.848},
     "team": {
       "type": "choice",
       "choice": "technical",
-      "probabilities": {"billing": 0.2023, "technical": 0.7833, "sales": 0.0144},
-      "confidence": 0.6749
+      "probabilities": {"billing": 0.2722, "technical": 0.7041, "sales": 0.0236},
+      "confidence": 0.5562
     }
   },
   "usage": {"input_tokens": 133, "output_tokens": 2}
@@ -77,10 +77,12 @@ Measured on the deployed function in eu-west-1. "Server" is the time the handler
 
 | Request | Server time |
 |---|---|
-| 1 question, short state (~130 tokens) | 1.7 s |
-| 2 questions, short state | 2.7 s |
-| 3 questions, short state | 3.5 s |
-| 3 questions, ~370-token state | 5.5 s |
+| 1 question, 86 input tokens | 1.7 s |
+| 2 questions, 133 tokens | 3.4 s |
+| 3 questions, 196 tokens | 4.2 s |
+| 3 questions, 358 tokens | 5.8 s |
+
+Median of three warm runs on the faster sandboxes. In a burst of four concurrent sandboxes, three ran the 1-question request in 1.65 s and one in 2.5 s, and another ran about 1.5x slower across the board. I haven't established why sandboxes differ, so expect that spread.
 
 Time scales with questions and input length, since each is a forward pass of a 2B model on 6 vCPUs. The model has no GPU path here, so this is the floor for this configuration, and more memory doesn't help because 10,240 MB is Lambda's maximum.
 

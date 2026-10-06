@@ -24,8 +24,8 @@ from pathlib import Path
 
 from huggingface_hub import snapshot_download
 
-CHECKPOINT_REPO = "StrandsAgents/strands-decider-2B-hobson-v19"
-CHECKPOINT_REV = "bb282d786bc251fd4e3068de3ada9ddbb38127cd"
+CHECKPOINT_REPO = "StrandsAgents/strands-decider-2B-hobson-v21"
+CHECKPOINT_REV = "2b52a6235c1b8306bbfa30b00b9d4b74b63a39f5"
 BASE_REPO = "Qwen/Qwen3.5-2B-Base"
 BASE_REV = "b1485b2fa6dfa1287294f269f5fb618e03d52d7c"
 BASE_FILE = "model.safetensors-00001-of-00001.safetensors"
